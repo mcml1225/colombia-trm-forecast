@@ -85,7 +85,7 @@ python src/data_fetcher.py
 #### Train Traditional Models
 python src/traditional_model.py
 
-####Train Deep Learning Models
+#### Train Deep Learning Models
 python src/ai_model.py
 
 #### Train Ensemble Model
@@ -109,7 +109,7 @@ BiLSTM	Bidirectional LSTM for better sequence learning
 GRU	Gated Recurrent Units (faster than LSTM)
 Attention-LSTM	LSTM with attention mechanism
 
-####Ensemble Methods
+#### Ensemble Methods
 Weighted Average with optimized weights
 
 Median combination
