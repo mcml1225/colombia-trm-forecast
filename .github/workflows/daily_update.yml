@@ -1,0 +1,65 @@
+﻿name: Daily TRM Data Update
+
+on:
+  schedule:
+    # Runs at 7:00 AM GMT-5 (12:00 UTC)
+    - cron: '12 12 * * *'
+  workflow_dispatch:  # Allows manual trigger
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Cache pip packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+          
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Run data fetcher
+      run: |
+        python src/data_fetcher.py
+        
+    - name: Train traditional models
+      run: |
+        python src/traditional_model.py
+        
+    - name: Train AI models (if GPU available)
+      run: |
+        python src/ai_model.py || echo "AI models training skipped"
+        
+    - name: Generate ensemble forecasts
+      run: |
+        python src/ensemble_model.py || echo "Ensemble generation skipped"
+        
+    - name: Commit and push if changes
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add data/processed/trm_historical.csv
+        git add models/traditional/*.pkl
+        git add models/ai/*.h5
+        git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-update TRM data [skip ci]" && git push)
+        
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: trm-data
+        path: data/processed/trm_historical.csv
+        retention-days: 30

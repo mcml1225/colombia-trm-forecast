@@ -1,0 +1,42 @@
+﻿# ========== SEGURIDAD ==========
+# No subir ningún archivo .txt
+*.txt
+*.token
+*.secret
+*.key
+*.pem
+bank_mark_token.txt
+*token*.txt
+colombia_trm_forecast-token}.txt
+
+# ========== PYTHON ==========
+__pycache__/
+*.py[cod]
+*.so
+.Python
+venv/
+env/
+.env
+.venv
+
+# ========== IDES ==========
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ========== SISTEMA OPERATIVO ==========
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ========== PROYECTO ==========
+data/raw/*.csv
+data/processed/*.csv
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+models/*.pkl
+models/*.h5
+models/*.joblib
+logs/
+*.log
