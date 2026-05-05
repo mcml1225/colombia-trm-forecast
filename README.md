@@ -36,45 +36,26 @@ Available formats: XLSX, PDF, CSV
 - Automatic daily updates at 7:00 AM (GMT-5)
 
 ## Project Structure
+```
 colombia-trm-forecast/
-├── .github/
-│ └── workflows/
-│ └── daily_update.yml # GitHub Actions automation (daily at 7:00 AM GMT-5)
+├── .github/workflows/
 ├── data/
-│ ├── raw/ # Raw data from Banco de la República
-│ └── processed/ # Processed and cleaned data
+│ ├── raw/
+│ └── processed/
 ├── models/
-│ ├── traditional/ # ARIMA, SARIMA, Prophet models
-│ ├── ai/ # LSTM, BiLSTM, GRU models
-│ └── ensemble/ # Ensemble model weights
+│ ├── traditional/
+│ ├── ai/
+│ └── ensemble/
 ├── src/
-│ ├── init.py
-│ ├── data_fetcher.py # Automatic data download from Banco de la República
-│ ├── preprocess.py # Data preprocessing and feature engineering
-│ ├── traditional_model.py # ARIMA, SARIMA, ETS, Prophet models
-│ ├── ai_model.py # LSTM, BiLSTM, GRU with Attention
-│ ├── ensemble_model.py # Ensemble predictions (weighted average, stacking)
-│ └── utils.py # Utility functions (dates, metrics, validation)
 ├── dashboard/
-│ └── app.py # Streamlit dashboard with visualizations
 ├── tests/
-│ ├── init.py
-│ ├── test_data_fetcher.py # Tests for data fetching
-│ ├── test_models.py # Tests for model training
-│ └── test_integration.py # Integration tests
 ├── .streamlit/
-│ └── config.toml # Streamlit configuration
-├── .env.example # Environment variables template
-├── .gitignore # Git ignore rules
-├── .pre-commit-config.yaml # Pre-commit hooks
-├── Dockerfile # Docker container configuration
-├── docker-compose.yml # Docker Compose for multi-container setup
-├── Makefile # Common commands (install, run, test)
-├── pytest.ini # Pytest configuration
-├── requirements.txt # Python dependencies
-├── setup.py # Package installation
-├── LICENSE # MIT License
-└── README.md # This file
+├── requirements.txt
+├── Dockerfile
+├── docker-compose.yml
+├── LICENSE
+└── README.md
+```
 
 ## Installation
 
