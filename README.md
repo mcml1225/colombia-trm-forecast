@@ -1,8 +1,9 @@
 # Colombia TRM Forecast
 
-[![GitHub stars](https://img.shields.io/github/stars/tu-usuario/colombia-trm-forecast)](https://github.com/tu-usuario/colombia-trm-forecast/stargazers)
-[![GitHub issues](https://img.shields.io/github/issues/tu-usuario/colombia-trm-forecast)](https://github.com/tu-usuario/colombia-trm-forecast/issues)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![GitHub stars](https://img.shields.io/github/stars/mcml1225/colombia-trm-forecast?style=social)](https://github.com/mcml1225/colombia-trm-forecast/stargazers)
+[![GitHub issues](https://img.shields.io/github/issues/mcml1225/colombia-trm-forecast)](https://github.com/mcml1225/colombia-trm-forecast/issues)
+[![GitHub license](https://img.shields.io/github/license/mcml1225/colombia-trm-forecast)](https://github.com/mcml1225/colombia-trm-forecast/blob/main/LICENSE)
+[![GitHub last commit](https://img.shields.io/github/last-commit/mcml1225/colombia-trm-forecast)](https://github.com/mcml1225/colombia-trm-forecast/commits/main)
 
 ## Colombia TRM Forecasting System
 
