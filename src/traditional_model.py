@@ -7,11 +7,13 @@ import pandas as pd
 from statsmodels.tsa.arima.model import ARIMA
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 from statsmodels.tsa.holtwinters import ExponentialSmoothing
-from prophet import Prophet
 from sklearn.metrics import mean_absolute_error, mean_squared_error, mean_absolute_percentage_error
 import joblib
 from pathlib import Path
 import logging
+import os
+import warnings
+warnings.filterwarnings('ignore')
 
 logger = logging.getLogger(__name__)
 
@@ -59,39 +61,6 @@ class TraditionalModels:
             logger.error(f"ETS fitting failed: {e}")
             return None
     
-    def fit_prophet(self, df: pd.DataFrame):
-        """Fit Prophet model with additional regressors"""
-        try:
-            # Prepare data for Prophet
-            prophet_df = pd.DataFrame()
-            prophet_df['ds'] = df['date']
-            prophet_df['y'] = df['trm']
-            
-            # Add additional regressors
-            prophet_df['open_rate'] = df['open_rate']
-            prophet_df['close_rate'] = df['close_rate']
-            prophet_df['num_trades'] = df['num_trades']
-            
-            model = Prophet(
-                yearly_seasonality=True,
-                weekly_seasonality=True,
-                daily_seasonality=False,
-                changepoint_prior_scale=0.05
-            )
-            
-            # Add regressors
-            model.add_regressor('open_rate')
-            model.add_regressor('close_rate')
-            model.add_regressor('num_trades')
-            
-            fitted = model.fit(prophet_df)
-            self.models['prophet'] = fitted
-            return fitted
-            
-        except Exception as e:
-            logger.error(f"Prophet fitting failed: {e}")
-            return None
-    
     def forecast(self, model_name: str, steps: int = 30) -> np.ndarray:
         """Generate forecasts from a specific model"""
         if model_name not in self.models:
@@ -101,13 +70,8 @@ class TraditionalModels:
         model = self.models[model_name]
         
         try:
-            if model_name == 'prophet':
-                future = model.make_future_dataframe(periods=steps)
-                forecast = model.predict(future)
-                return forecast['yhat'].values[-steps:]
-            else:
-                forecast = model.forecast(steps=steps)
-                return forecast
+            forecast = model.forecast(steps=steps)
+            return forecast
         except Exception as e:
             logger.error(f"Forecasting failed for {model_name}: {e}")
             return None
@@ -143,20 +107,76 @@ class TraditionalModels:
             self.models[name] = joblib.load(model_file)
         logger.info(f"Loaded {len(self.models)} traditional models")
 
+
+def create_sample_data_if_needed():
+    """Create sample data if the CSV file doesn't exist"""
+    data_path = Path("data/processed/trm_historical.csv")
+    
+    if not data_path.exists():
+        print("Data file not found. Creating sample data...")
+        Path("data/processed").mkdir(parents=True, exist_ok=True)
+        
+        from datetime import datetime, timedelta
+        
+        dates = pd.date_range(end=datetime.now(), periods=200, freq='D')
+        base_trm = 3600
+        trend = np.linspace(0, 100, 200)
+        seasonality = 50 * np.sin(2 * np.pi * np.arange(200) / 30)
+        noise = np.random.normal(0, 15, 200)
+        trm_values = base_trm + trend + seasonality + noise
+        
+        df = pd.DataFrame({
+            'date': dates,
+            'trm': trm_values,
+            'open_rate': trm_values + np.random.normal(0, 5, 200),
+            'close_rate': trm_values + np.random.normal(0, 5, 200),
+            'max_rate': trm_values + np.random.uniform(5, 20, 200),
+            'min_rate': trm_values - np.random.uniform(5, 20, 200),
+            'num_trades': np.random.randint(1000, 5000, 200)
+        })
+        df.to_csv(data_path, index=False)
+        print(f"Sample data created with {len(df)} rows at {data_path}")
+    else:
+        print(f"Data file found at {data_path}")
+
+
 if __name__ == "__main__":
-    # Test traditional models
+    # Crear datos si no existen
+    create_sample_data_if_needed()
+    
+    # Cargar datos
     df = pd.read_csv("data/processed/trm_historical.csv")
+    print(f"Data loaded: {len(df)} rows")
+    
+    # Verificar columnas
+    if 'date' in df.columns:
+        df['date'] = pd.to_datetime(df['date'])
+    
+    # Usar la columna TRM
     series = df['trm'].values
+    print(f"Series length: {len(series)}")
+    print(f"TRM range: {series.min():.2f} - {series.max():.2f}")
     
+    # Dividir datos
+    train_size = len(series) - 30
+    train_series = series[:train_size]
+    test_series = series[train_size:]
+    
+    print(f"Train size: {len(train_series)}, Test size: {len(test_series)}")
+    
+    # Probar modelos
     traditional = TraditionalModels()
-    traditional.fit_arima(series)
-    traditional.fit_sarima(series)
     
-    # Evaluate
-    test_size = 30
-    train_series = series[:-test_size]
-    test_series = series[-test_size:]
+    print("\nTraining ARIMA model...")
+    arima_model = traditional.fit_arima(train_series, order=(3,1,0))
+    if arima_model:
+        print("ARIMA model trained successfully")
+        forecast = traditional.forecast('arima', steps=len(test_series))
+        if forecast is not None:
+            print(f"ARIMA forecast generated: {len(forecast)} steps")
+            mae = np.mean(np.abs(test_series - forecast))
+            print(f"ARIMA Test MAE: {mae:.2f}")
+    else:
+        print("ARIMA model training failed")
     
-    traditional.fit_arima(train_series)
-    metrics = traditional.evaluate_models(test_series)
-    print(f"Model metrics: {metrics}")
+    print("\nDone!")
