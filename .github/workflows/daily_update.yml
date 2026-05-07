@@ -59,14 +59,13 @@ jobs:
       run: |
         python src/ensemble_model.py || echo "Ensemble generation skipped"
         
-    - name: Commit and push if changes
-      run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git add data/processed/trm_historical.csv
-        git add models/traditional/*.pkl
-        git add models/ai/*.h5
-        git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-update TRM data [skip ci]" && git push)
+  - name: Commit and push if changes
+    run: |
+      git config --local user.email "action@github.com"
+      git config --local user.name "GitHub Action"
+      # Forzar add aunque esté en .gitignore
+      git add -f data/processed/trm_historical.csv
+      git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-update TRM data [skip ci]" && git push)
         
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
