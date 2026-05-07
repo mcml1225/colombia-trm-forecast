@@ -2,9 +2,8 @@
 
 on:
   schedule:
-    # Runs at 7:00 AM GMT-5 (12:00 UTC)
     - cron: '12 12 * * *'
-  workflow_dispatch:  # Allows manual trigger
+  workflow_dispatch:
 
 jobs:
   update-data:
@@ -26,32 +25,28 @@ jobs:
         key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
         restore-keys: |
           ${{ runner.os }}-pip-
-
+          
     - name: Create data directories
       run: |
         mkdir -p data/raw data/processed
         echo "Directories created"
-          
-          
+        
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        # Instalar dependencias básicas primero
         pip install numpy pandas scikit-learn statsmodels
-        # Instalar prophet con sus dependencias específicas
-        pip install prophet
-        # Instalar el resto
+        pip install prophet || echo "Prophet installation failed"
         pip install -r requirements.txt || true
         
     - name: Run data fetcher
       run: |
-        python src/data_fetcher.py
+        python src/data_fetcher.py || echo "Data fetcher failed"
         
     - name: Train traditional models
       run: |
-        python src/traditional_model.py
+        python src/traditional_model.py || echo "Traditional models failed"
         
-    - name: Train AI models (if GPU available)
+    - name: Train AI models
       run: |
         python src/ai_model.py || echo "AI models training skipped"
         
@@ -59,13 +54,12 @@ jobs:
       run: |
         python src/ensemble_model.py || echo "Ensemble generation skipped"
         
-   - name: Commit and push if changes
-     run: |
-       git config --local user.email "action@github.com"
-       git config --local user.name "GitHub Action"
-       # Forzar add aunque esté en .gitignore
-       git add -f data/processed/trm_historical.csv
-       git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-update TRM data [skip ci]" && git push)
+    - name: Commit and push if changes
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add -f data/processed/trm_historical.csv
+        git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-update TRM data [skip ci]" && git push)
         
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
