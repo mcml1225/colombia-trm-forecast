@@ -31,8 +31,8 @@ Thumbs.db
 desktop.ini
 
 # ========== PROYECTO ==========
-data/raw/*.csv
 data/processed/*.csv
+!data/processed/trm_historical.csv
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 models/*.pkl
